@@ -40,6 +40,17 @@ function buildQuestionList(data){
   return builtDomElement
 }
 
+function buildLinkTo(quiz){
+  var link = T.dup('#link').text(quiz.name)
+  link.click(function(e){
+    e.preventDefault()
+
+    makeNextQuestionAjaxCall(quiz.id)
+
+  })
+  return link
+}
+
 // wait for user....
 function displayNextQuestion(data){
   $(".container").html(buildQuestionWithChoicesList(data))
@@ -57,38 +68,39 @@ function buildQuestionWithChoicesList(data){
   return questionDomElement
 }
 
-function buildLinkTo(quiz){
-  var link = T.dup('#link').text(quiz.name)
-  link.click(function(e){
-    e.preventDefault()
-
-    makeNextQuestionAjaxCall(quiz.id)
-
-  })
-  return link
-}
-
 function makeNextQuestionAjaxCall(quiz_id) {
   $.ajax(RequestBuilder.nextQuestion(quiz_id))
   .done(displayNextQuestion)
+  .fail(function(response){
+      alert("awef")
+      $(".container").html("<h3>No more questions. Shut up Rao.</h3>");
+    });
 }
 
 function buildAnotherLinkTo(choice, question_id) {
   var link = T.dup('#link').text(choice.choice)
   link.click(function(e){
     e.preventDefault()
-
     $.ajax(RequestBuilder.postChoice(question_id, choice.id))
-    .done(function(response){
+    .success(function(response,status,b,d){
       makeNextQuestionAjaxCall(response.quiz_id)
+      reportProgress(response)
     })
-    .error(function(response){
-      $(".container").html("<h3>No more questions.</h3>");
-    });
 
   })
   return link
+}
 
+function reportProgress(response){
+  //debugger
+  var msg = "Your last response was "
+  msg += response.correct ? "correct!" : "incorrect!"
+  var elem = $("#correct").html(msg)
+  $(".main").append(elem)
+
+  var tally = "Number correct: " + response.num_correct + "<br>Number incorrect: " + response.num_incorrect
+  var tally_elem = $("#tally").html(tally)
+  $(".main").append(tally_elem)
 }
 
 function setup(){

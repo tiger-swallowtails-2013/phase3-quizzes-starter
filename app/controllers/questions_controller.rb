@@ -9,6 +9,7 @@ class QuestionsController < ApplicationController
       if remaining_questions.count > 0
         render json: remaining_questions.first.to_json
       else
+        puts "XWEFSCDFESFFFFFFFF_________________________________________"
         render status: :unprocessable_entity, json: { message: "No more questions in quiz '#{quiz.name}'!" }.to_json
       end
     else
