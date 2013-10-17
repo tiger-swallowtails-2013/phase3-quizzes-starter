@@ -14,7 +14,6 @@
 //= require jquery_ujs
 //= require_tree .
 
-
 function registerSession(){
   session = new Date().getTime()
 }
@@ -25,7 +24,7 @@ Templater = T = {
   }
 }
 
-function displayQuestionList(data){
+function displayQuizList(data){
   $(".container").html(buildQuestionList(data))
 }
 
@@ -41,9 +40,25 @@ function buildQuestionList(data){
   return builtDomElement
 }
 
+// wait for user....
+function displayNextQuestion(data){
+  $(".container").html(buildQuestionWithChoicesList(data))
+}
+
+function buildQuestionWithChoicesList(data){
+  var questionDomElement = T.dup('#question')
+  questionDomElement.append(T.dup('#question-title').text(data.question))
+
+  $.each(data.choices, function(i, choice){
+    questionDomElement.append(buildAnotherLinkTo(choice, data.id))
+    questionDomElement.append("<br>")
+  })
+
+  return questionDomElement
+}
+
 function buildLinkTo(quiz){
   var link = T.dup('#link').text(quiz.name)
-
   link.click(function(e){
     e.preventDefault()
 
@@ -60,50 +75,25 @@ function makeNextQuestionAjaxCall(quiz_id) {
 
 function buildAnotherLinkTo(choice, question_id) {
   var link = T.dup('#link').text(choice.choice)
-
   link.click(function(e){
     e.preventDefault()
 
     $.ajax(RequestBuilder.postChoice(question_id, choice.id))
     .done(function(response){
-      //alert(JSON.stringify(response))
       makeNextQuestionAjaxCall(response.quiz_id)
-      //console.log(response)
-    }
-
-      // parse json response... to:
-      // count if the answer was correct
-      // displayNextQuestion
-      )
+    })
+    .error(function(response){
+      $(".container").html("<h3>No more questions.</h3>");
+    });
 
   })
   return link
 
 }
 
-function displayNextQuestion(data){
-  $(".container").html(buildQuestionWithChoicesList(data))
-}
-
-function buildQuestionWithChoicesList(data){
-  var questionDomElement = T.dup('#question')
-  questionDomElement.append(T.dup('#question-title').text(data.question))
-
-  console.log(data)
-
-  $.each(data.choices, function(i, choice){
-    questionDomElement.append(buildAnotherLinkTo(choice, data.id))
-    questionDomElement.append("<br>")
-  })
-
-  return questionDomElement
-}
-
 function setup(){
   registerSession()
-  $.ajax(RequestBuilder.listQuizzes()).done(displayQuestionList)
+  $.ajax(RequestBuilder.listQuizzes()).done(displayQuizList)
 }
 
 $(document).ready(setup)
-
-// {"quizzes":[{"id":1,"name":"Dev Bootcamp Questions"}]}
