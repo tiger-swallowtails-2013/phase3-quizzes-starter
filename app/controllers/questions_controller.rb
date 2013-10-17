@@ -30,7 +30,8 @@ class QuestionsController < ApplicationController
         submitted_choice: submitted_choice.id,
         correct_choice: correct_choice.id,
         num_correct: (submitted_choice.id == correct_choice.id) ? 1 : 0,
-        num_incorrect: (submitted_choice.id == correct_choice.id) ? 0 : 1
+        num_incorrect: (submitted_choice.id == correct_choice.id) ? 0 : 1,
+        quiz_id: question.quiz.id
       }.to_json
     else
       render status: :unprocessable_entity, json: { message: "#{question.id} is not a valid question id!" }.to_json
