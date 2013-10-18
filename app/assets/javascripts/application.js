@@ -44,10 +44,15 @@ function buildLinkTo(quiz){
   var link = T.dup('#link').text(quiz.name)
   link.click(function(e){
     e.preventDefault()
-
-    makeNextQuestionAjaxCall(quiz.id)
-
+    Reclap.pushState(quiz.id)
   })
+  // link.click(function(e){
+  //   // Reclap.pushState(quiz.)
+  //   e.preventDefault()
+
+  //   makeNextQuestionAjaxCall(quiz.id)
+
+  // })
   return link
 }
 
@@ -72,9 +77,8 @@ function makeNextQuestionAjaxCall(quiz_id) {
   $.ajax(RequestBuilder.nextQuestion(quiz_id))
   .done(displayNextQuestion)
   .fail(function(response){
-      alert("awef")
       $(".container").html("<h3>No more questions. Shut up Rao.</h3>");
-    });
+  });
 }
 
 function buildAnotherLinkTo(choice, question_id) {
@@ -103,9 +107,16 @@ function reportProgress(response){
   $(".main").append(tally_elem)
 }
 
-function setup(){
-  registerSession()
-  $.ajax(RequestBuilder.listQuizzes()).done(displayQuizList)
+function respond_to_hash_state(url_hash){
+  if(url_hash == ""){
+    console.log(url_hash)
+    $.ajax(RequestBuilder.listQuizzes()).done(displayQuizList)
+  }
+  else{
+    makeNextQuestionAjaxCall(url_hash)
+  }
 }
 
-$(document).ready(setup)
+registerSession()
+Reclap.setResponder(respond_to_hash_state)
+$(document).ready()
